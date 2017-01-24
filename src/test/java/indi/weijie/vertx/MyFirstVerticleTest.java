@@ -1,6 +1,8 @@
 package indi.weijie.vertx;
 
+import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
@@ -18,11 +20,16 @@ import static org.junit.Assert.*;
 public class MyFirstVerticleTest {
 
     private Vertx vertx;
+    private int port = 8081;
 
     @Before
     public void setUp(TestContext context) throws Exception {
         vertx = Vertx.vertx();
-        vertx.deployVerticle(MyFirstVerticle.class.getName(),
+
+        DeploymentOptions options = new DeploymentOptions()
+                .setConfig(new JsonObject().put("http.port", port));
+
+        vertx.deployVerticle(MyFirstVerticle.class.getName(), options,
                 context.asyncAssertSuccess());
     }
 
@@ -35,7 +42,7 @@ public class MyFirstVerticleTest {
     public void testMyApplication(TestContext context) throws Exception {
         final Async async = context.async();
 
-        vertx.createHttpClient().getNow(8080, "localhost", "/",
+        vertx.createHttpClient().getNow(port, "localhost", "/",
                 response -> {
                     response.handler(body -> {
                         context.assertTrue(body.toString().contains("Hello"));
